@@ -11,4 +11,9 @@ using namespace std;
 using namespace std::chrono;
 int main()
 {
+    unique_ptr<Data<float>> base = create_and_fill<float, IntroSortData<float>>(20, 0, 100);
+    base->show();
+    cout << endl;
+    base->sort();
+    base->show();
 }

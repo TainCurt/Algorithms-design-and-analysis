@@ -10,6 +10,10 @@ public:
     {
         mergeSort(0, this->size - 1);
     }
+    void sort_p(int part) override
+    {
+        mergeSort(0, (this->size * part) / 1000 - 1);
+    }
     unique_ptr<Data<T>> clone() const override
     {
         return make_unique<MergeSortData<T>>(*this);
