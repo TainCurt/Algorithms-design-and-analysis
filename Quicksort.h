@@ -35,7 +35,7 @@ private:
         }
     }
 
-    T partition(int low, int high)
+    int partition(int low, int high)
     {
         T pivot = this->array[high];
         int i = low - 1;
