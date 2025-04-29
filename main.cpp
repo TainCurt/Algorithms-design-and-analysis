@@ -9,87 +9,152 @@
 #include <chrono>
 using namespace std;
 using namespace std::chrono;
-int benchmark()
+int main()
 {
-    Timer timer;
-    int size_to_sort[] = {100, 500, 1000, 5000, 10000, 50000, 100000, 500000, 1000000};
-    int percent[] = {0, 250, 500, 750, 950, 990, 997};
-    for (int i = 0; i < sizeof(size_to_sort) / sizeof(size_to_sort[0]); i++)
+    int data_choice = 0;
+    int size = 0;
+    int sort_algorithm = 0;
+    int prct = 0;
+    string file_name = "1mData.txt"; // Domyślnie plik z losowymi danymi
+
+    cout << "This program tests various sorting algorithms." << endl;
+    cout << "Please choose your desired algorithm, data source, size, and sort percentage." << endl;
+
+    cout << "Choose sorting algorithm: " << endl;
+    cout << "1. Quick Sort" << endl;
+    cout << "2. Merge Sort" << endl;
+    cout << "3. Intro Sort" << endl;
+    cout << "Your choice: ";
+    cin >> sort_algorithm;
+    cout << endl;
+    cout << "Enter desired data size (from 0 to 1,000,000): ";
+    cin >> size;
+    cout << endl;
+    cout << "Choose your data source: " << endl;
+    cout << "1. Random generated" << endl;
+    cout << "2. Loaded from file" << endl;
+    cout << "3. Sorted in reverse" << endl;
+    cout << "Your choice: ";
+    cin >> data_choice;
+
+    // Wybór pliku na podstawie typu danych
+
+    if (data_choice == 3)
     {
-        unique_ptr<Data<int>> quicksort = create_and_fill<int, QuickSortData<int>>(size_to_sort[i], "1mData.txt");
-        unique_ptr<Data<int>> mergesort = create_and_fill<int, MergeSortData<int>>(size_to_sort[i], "1mData.txt");
-        unique_ptr<Data<int>> introsort = create_and_fill<int, IntroSortData<int>>(size_to_sort[i], "1mData.txt");
+        file_name = "reversedData.txt";
+    }
 
-        vector<unique_ptr<Data<int>>> test_quicksort = prepare_copies(quicksort, 100);
-        vector<unique_ptr<Data<int>>> test_mergesort = prepare_copies(mergesort, 100);
-        vector<unique_ptr<Data<int>>> test_introsort = prepare_copies(introsort, 100);
-        for (int j = 0; j < sizeof(percent) / sizeof(percent[0]); j++)
+    if (data_choice == 1 || data_choice == 2)
+    {
+        cout << endl;
+        cout << "Choose the percentage of data to be pre-sorted: " << endl;
+        cout << "1. 0%" << endl;
+        cout << "2. 25%" << endl;
+        cout << "3. 50%" << endl;
+        cout << "4. 75%" << endl;
+        cout << "5. 95%" << endl;
+        cout << "6. 99%" << endl;
+        cout << "7. 99.7%" << endl;
+        cout << "Your choice: ";
+        cin >> prct;
+    }
+
+    // Przekształć wybór procentowy na wartość liczbową
+    int percent[] = {0, 250, 500, 750, 950, 990, 997};
+    float sorted_percent = 0.0f;
+    if (data_choice == 1 || data_choice == 2)
+    {
+        if (prct >= 1 && prct <= 7)
         {
-            float sorted_percent = static_cast<float>(percent[j]) / 1000.0f;
-            if (percent[j] == 0)
-            {
-                for (int k = 0; k < 100; k++)
-                {
-                    timer.start();
-                    test_quicksort[k]->sort();
-                    timer.stop();
-                }
-                cout << "Quicksort " << size_to_sort[i] << " elementow. Posortowane 0%. Czas: " << timer.result() << endl;
-                timer.reset();
-
-                for (int k = 0; k < 100; k++)
-                {
-                    timer.start();
-                    test_mergesort[k]->sort();
-                    timer.stop();
-                }
-                cout << "Mergesort " << size_to_sort[i] << " elementow. Posortowane 0%. Czas: " << timer.result() << endl;
-                timer.reset();
-
-                for (int k = 0; k < 100; k++)
-                {
-                    timer.start();
-                    test_introsort[k]->sort();
-                    timer.stop();
-                }
-                cout << "Introsort " << size_to_sort[i] << " elementow. Posortowane 0%. Czas: " << timer.result() << endl;
-                timer.reset();
-                cout << endl;
-            }
-            else
-            {
-                for (int k = 0; k < 100; k++)
-                {
-                    test_quicksort[k]->sort_p(percent[j]);
-                    timer.start();
-                    test_quicksort[k]->sort();
-                    timer.stop();
-                }
-                cout << "Quicksort " << size_to_sort[i] << " elementow. Posortowane " << sorted_percent * 100 << "%. Czas: " << timer.result() << endl;
-                timer.reset();
-
-                for (int k = 0; k < 100; k++)
-                {
-                    test_mergesort[k]->sort_p(percent[j]);
-                    timer.start();
-                    test_mergesort[k]->sort();
-                    timer.stop();
-                }
-
-                cout << "Mergesort " << size_to_sort[i] << " elementow. Posortowane " << sorted_percent * 100 << "%. Czas: " << timer.result() << endl;
-                timer.reset();
-
-                for (int k = 0; k < 100; k++)
-                {
-                    test_introsort[k]->sort_p(percent[j]);
-                    timer.start();
-                    test_introsort[k]->sort();
-                    timer.stop();
-                }
-                cout << "Introsort " << size_to_sort[i] << " elementow. Posortowane " << sorted_percent * 100 << "%. Czas: " << timer.result() << endl;
-                timer.reset();
-                cout << endl;
-            }
+            sorted_percent = static_cast<float>(percent[prct - 1]) / 1000.0f;
         }
     }
+
+    Timer timer;
+    int repetitions = 100;
+
+    if (sort_algorithm == 1)
+    {
+        unique_ptr<Data<int>> quicksort;
+        if (data_choice == 1)
+        {
+            quicksort = create_and_fill<int, QuickSortData<int>>(size, 0, 1000000);
+        }
+        else
+        {
+            quicksort = create_and_fill<int, QuickSortData<int>>(size, file_name);
+        }
+        auto tests = prepare_copies<>(quicksort, repetitions);
+
+        for (int k = 0; k < repetitions; k++)
+        {
+            if (data_choice != 3 && percent[prct - 1] != 0)
+            {
+                tests[k]->sort_p(percent[prct - 1]);
+            }
+
+            timer.start();
+            tests[k]->sort();
+            timer.stop();
+        }
+        cout << "QuickSort: " << size << " elements, sorted " << sorted_percent * 100 << "%. Avg time: " << timer.result() / repetitions << " ms" << endl;
+    }
+    else if (sort_algorithm == 2)
+    {
+        unique_ptr<Data<int>> mergesort;
+        if (data_choice == 1)
+        {
+            mergesort = create_and_fill<int, QuickSortData<int>>(size, 0, 1000000);
+        }
+        else
+        {
+            mergesort = create_and_fill<int, MergeSortData<int>>(size, file_name);
+        }
+        auto tests = prepare_copies(mergesort, repetitions);
+
+        for (int k = 0; k < repetitions; k++)
+        {
+            if (data_choice != 3 && percent[prct - 1] != 0)
+            {
+                tests[k]->sort_p(percent[prct - 1]);
+            }
+
+            timer.start();
+            tests[k]->sort();
+            timer.stop();
+        }
+        cout << "MergeSort: " << size << " elements, sorted " << sorted_percent * 100 << "%. Avg time: " << timer.result() / repetitions << " ms" << endl;
+    }
+    else if (sort_algorithm == 3)
+    {
+        unique_ptr<Data<int>> introsort;
+        if (data_choice == 1)
+        {
+            introsort = create_and_fill<int, QuickSortData<int>>(size, 0, 1000000);
+        }
+        else
+        {
+            introsort = create_and_fill<int, MergeSortData<int>>(size, file_name);
+        }
+        auto tests = prepare_copies(introsort, repetitions);
+
+        for (int k = 0; k < repetitions; k++)
+        {
+            if (data_choice != 3 && percent[prct - 1] != 0)
+            {
+                tests[k]->sort_p(percent[prct - 1]);
+            }
+
+            timer.start();
+            tests[k]->sort();
+            timer.stop();
+        }
+        cout << "IntroSort: " << size << " elements, sorted " << sorted_percent * 100 << "%. Avg time: " << timer.result() / repetitions << " ms" << endl;
+    }
+    else
+    {
+        cout << "Invalid sorting algorithm selected." << endl;
+    }
+
+    return 0;
 }

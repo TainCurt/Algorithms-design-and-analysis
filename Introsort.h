@@ -4,29 +4,38 @@
 #include <algorithm>
 #include <memory>
 
+// Szablon klasy IntroSortData dziedziczącej po Data<T>
+// Implementuje sortowanie metodą Introsort (QuickSort + HeapSort + InsertionSort)
 template <typename T>
 class IntroSortData : public Data<T>
 {
 public:
+    // Konstruktor domyślny
     IntroSortData() : Data<T>() {}
+
+    // Konstruktor kopiujący
     IntroSortData(const IntroSortData<T> &other) : Data<T>(other) {}
 
+    // Funkcja sortująca całą tablicę
     void sort() override
     {
         Introsort(0, this->size - 1);
     }
 
+    // Funkcja sortująca część tablicy
     void sort_p(int part) override
     {
         Introsort(0, (this->size * part) / 1000 - 1);
     }
 
+    // Funkcja klonująca obiekt
     std::unique_ptr<Data<T>> clone() const override
     {
         return std::make_unique<IntroSortData<T>>(*this);
     }
 
 private:
+    // Funkcja sortowania przez wstawianie (dla małych fragmentów tablicy)
     void InsertionSort(int begin, int end)
     {
         for (int i = begin + 1; i <= end; i++)
@@ -42,6 +51,7 @@ private:
         }
     }
 
+    // Funkcja dzieląca tablicę wokół pivota (jak w QuickSorc'ie)
     int Partition(int low, int high)
     {
         T pivot = this->array[high];
@@ -58,6 +68,7 @@ private:
         return i + 1;
     }
 
+    // Funkcja zwracająca indeks elementu mediany z trzech
     int MedianOfThree(int a, int b, int c)
     {
         T &A = this->array[a];
@@ -71,16 +82,19 @@ private:
         return c;
     }
 
+    // Główna funkcja pomocnicza introsorta
     void IntroSortUtil(int begin, int end, int depthLimit)
     {
         int size = end - begin + 1;
 
+        // Jeśli fragment jest mały, używamy sortowania przez wstawianie
         if (size < 16)
         {
             InsertionSort(begin, end);
             return;
         }
 
+        // Jeśli osiągnięto maksymalną głębokość rekurencji, przechodzimy na HeapSort
         if (depthLimit == 0)
         {
             std::make_heap(this->array + begin, this->array + end + 1);
@@ -88,6 +102,7 @@ private:
             return;
         }
 
+        // QuickSort z pivotem wybranym jako mediana z trzech
         int pivotIndex = MedianOfThree(begin, begin + size / 2, end);
         std::swap(this->array[pivotIndex], this->array[end]);
 
@@ -96,9 +111,10 @@ private:
         IntroSortUtil(partitionPoint + 1, end, depthLimit - 1);
     }
 
+    // Funkcja wywołująca algorytm Introsort
     void Introsort(int begin, int end)
     {
-        int depthLimit = 2 * std::log(end - begin + 1);
+        int depthLimit = 2 * std::log(end - begin + 1); // Maksymalna głębokość rekurencji
         IntroSortUtil(begin, end, depthLimit);
     }
 };
